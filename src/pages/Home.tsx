@@ -31,7 +31,7 @@ const Home = () => {
       <table className="styled-table">
         <thead>
           <tr>
-            <th style={{ textAlign: "center" }}>No.</th>
+            <th style={{ textAlign: "center" }}>Number</th>
             <th style={{ textAlign: "center" }}>Name</th>
             <th style={{ textAlign: "center" }}>Email</th>
             <th style={{ textAlign: "center" }}>Contact</th>
