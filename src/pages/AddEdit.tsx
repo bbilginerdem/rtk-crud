@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import "./AddEdit.css"
-import { useAddContactMutation } from '../services/contactsApi'
+import { useAddContactMutation, useContactQuery, useUpdateContactMutation } from '../services/contactsApi'
 
 const initialState = {
   name: "",
@@ -12,9 +12,32 @@ const initialState = {
 
 const AddEdit = () => {
   const [formValue, setFormValue] = useState(initialState)
+  const [editMode, setEditMode] = useState(false)
   const [addContact] = useAddContactMutation()
+  const [updateContact] = useUpdateContactMutation()
   const { name, email, contact } = formValue
   const navigate = useNavigate()
+
+  const { id } = useParams()
+  const { data, error } = useContactQuery(id!)
+
+  useEffect(() => {
+    if (id) {
+      setEditMode(true)
+      if (data) {
+        setFormValue({ ...data })
+      }
+    } else {
+      setEditMode(false)
+      setFormValue({ ...initialState })
+    }
+  }, [id, data])
+
+  useEffect(() => {
+    if (error && id) {
+      toast.error("Something went wrong!")
+    }
+  }, [error, id])
 
   const handleInputChange = (e: any) => {
     let { name, value } = e.target
@@ -25,9 +48,16 @@ const AddEdit = () => {
     if (!name && !email && !contact) {
       toast.error("Please fill all the fields!")
     } else {
-      await addContact(formValue)
-      navigate("/")
-      toast.success("Contact Added Successfully!")
+      if (!editMode) {
+        await addContact(formValue)
+        navigate("/")
+        toast.success("Contact Added Successfully!")
+      } else {
+        await updateContact(formValue)
+        navigate("/")
+        setEditMode(false)
+        toast.success("Contact Updated Successfully!")
+      }
     }
   }
 
@@ -47,7 +77,7 @@ const AddEdit = () => {
         <input type="email" id="email" name="email" placeholder="Enter Email..." value={email} onChange={handleInputChange} />
         <label htmlFor="contact">Contact</label>
         <input type="number" id="contact" name="contact" placeholder="Enter Contact Number..." value={contact} onChange={handleInputChange} />
-        <input type="submit" value="Add" />
+        <input type="submit" value={editMode ? "Update" : "Add"} />
       </form>
     </div>
   )
