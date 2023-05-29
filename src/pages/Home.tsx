@@ -2,11 +2,12 @@ import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
-import { useContactsQuery } from '../services/contactsApi'
+import { useContactsQuery, useDeleteContactMutation } from '../services/contactsApi'
 import './Home.css'
 
 const Home = () => {
   const { data, error, isLoading } = useContactsQuery()
+  const [deleteContact] = useDeleteContactMutation()
   console.log(error)
 
   useEffect(() => {
@@ -19,6 +20,13 @@ const Home = () => {
 
   if (isLoading) {
     return <h3>Loading...</h3>
+  }
+
+  const handleDelete = async (id: any) => {
+    if (window.confirm("Are you sure you want to delete this contact?")) {
+      await deleteContact(id)
+      toast.success("Contact Deleted Successfully!")
+    }
   }
 
   return (
@@ -52,7 +60,7 @@ const Home = () => {
                   <Link to={`/editContact/${item.id}`}>
                     <button className='btn btn-edit'>Edit</button>
                   </Link>
-                  <button className="btn btn-delete">
+                  <button className="btn btn-delete" onClick={() => handleDelete(item.id)}>
                     Delete
                   </button>
                   <Link to={`/info/${item.id}`}>
